@@ -180,7 +180,8 @@ class hash_map_const_iterator {
     return (a._x + a._xIndex  == b._x + b._xIndex);
   }
   friend bool operator!=(const hash_map_const_iterator<ValueType>& a, const hash_map_const_iterator<ValueType>& b) {
-    return !(a == b);
+    return !((const hash_map_const_iterator<ValueType>& a, const hash_map_const_iterator<ValueType>& b) {
+    return (a._x + a._xIndex  == b._x + b._xIndex));
   }
 
  private:
@@ -341,7 +342,7 @@ class hash_map
 
   ///  Returns true if the %hash_map is empty.
   bool empty() const noexcept {
-    return _elementCount <= 0;
+    return _elementCount == 0;
   }
 
   ///  Returns the size of the %hash_map.
