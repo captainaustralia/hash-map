@@ -285,7 +285,7 @@ namespace fefu
 
         /**
         *  @brief  Move constructor with allocator argument.
-        *  @param  uset Input %hash_map to move.
+        *  @param  umap Input %hash_map to move.
         *  @param  a    An allocator object.
         */
         hash_map(hash_map&& umap,
@@ -353,7 +353,7 @@ namespace fefu
 
         ///  Returns the maximum size of the %hash_map.
         size_type max_size() const noexcept {
-            return std::numeric_limits<size_type>().max();
+            return std::numeric_limits<size_type>::max();
         }
 
         // iterators.
@@ -500,7 +500,7 @@ namespace fefu
          *  Complexity similar to that of the range constructor.
          */
         template<typename _InputIterator>
-        void insert(_InputIterator first, _InputIterator last) {
+        void insert(_InputIterator first, _InputIterator last) { // first- ot , last - do
             for (auto& i = first; i != last; ++i) {
                 insert(*i);
             }
@@ -565,7 +565,7 @@ namespace fefu
          */
         iterator erase(const_iterator position) {
             auto res = ++(find(position->first));
-            destroy_at(_data + position._xIndex);
+            (_data + position._xIndex) -> ~value_type();
             _cellsState[position._xIndex] = _freed;
             _elementCount--;
             _deletedElementCount++;
@@ -629,7 +629,7 @@ namespace fefu
         void clear() noexcept {
             for (auto i = 0; i < bucket_count(); ++i) {
                 if (_cellsState[i] == _busy) {
-                    destroy_at(_data + i);
+                    (_data + i) -> ~value_type();
                 }
                 _cellsState[i] = _empty;
             }
@@ -839,7 +839,7 @@ namespace fefu
          *  %hash_map maximum load factor.
          */
         void rehash(size_type n) {
-            if (static_cast<float>(loadCells()) / n > max_load_factor()) return; // Проверка на малое кол-во бакетов.
+            if (static_cast<float>(loadCells()) / n > max_load_factor()) return;
             std::vector<value_type> tmp(begin(), end());
             destroy();
             _data = _allocator.allocate(n);
@@ -885,10 +885,14 @@ namespace fefu
                 _deletedElementCount(0),
                 _bucketCount(n) {}
 
-        void destroy() {
-            clear();
-            _allocator.deallocate(_data, bucket_count());
-            delete[]_cellsState;
+       void destroy() {
+            for (int i = 0; i < _bucketCount; ++i) {
+                if (_cellsState[i] == _busy)
+                    (_data + i) -> ~value_type();
+            }
+            _allocator.deallocate(_data, _bucketCount);
+                delete[] _cellsState;
+                _cellsState = nullptr;
         }
 
         mapped_type& common_at(const key_type& k) {
